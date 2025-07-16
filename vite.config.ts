@@ -5,8 +5,8 @@ export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
-      external: ['fsevents'],
+      external: ['fsevents', '../pkg'], // ⬅️ hier explizit ignorieren
     },
   },
-  assetsInclude: ['**/*.node'], // ⬅️ Wichtig!
+  assetsInclude: ['**/*.node'],
 })
