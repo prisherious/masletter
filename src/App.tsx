@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { supabase } from "./supabaseClient";
 
-// Extrahiere die NFC-ID aus der URL: z. B. /04D15A1D3B4189 → "04D15A1D3B4189"
-const NFC_ID = window.location.pathname.split("/")[1] || "default";
-
 function App() {
+  const { tagId } = useParams(); // Liest die NFC-ID aus der URL
+  const NFC_ID = tagId || "default";
+
   const [messages, setMessages] = useState<string[]>([]);
   const [input, setInput] = useState("");
 
@@ -28,7 +29,7 @@ function App() {
     };
 
     loadMessages();
-  }, []);
+  }, [NFC_ID]);
 
   // Nachricht senden
   const sendMessage = async () => {
