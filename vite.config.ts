@@ -9,7 +9,7 @@ export default defineConfig({
       external: ['fsevents', '../pkg'],
     },
     commonjsOptions: {
-      ignoreTryCatch: (id) => true,
+      ignoreTryCatch: () => true,
     },
   },
 })
