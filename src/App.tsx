@@ -1,64 +1,63 @@
-import { useEffect, useState } from "react"
-import { supabase } from "./supabaseClient"
+import { useEffect, useState } from "react";
+import { supabase } from "./supabaseClient";
 
-// Holt die NFC-ID aus der URL: z. B. /04D15A1D3B4189 → "04D15A1D3B4189"
-const NFC_ID = decodeURIComponent(
-  window.location.pathname.replace(/^\/+/, "") || "default"
-)
+// Extrahiere die NFC-ID aus der URL: z. B. /04D15A1D3B4189 → "04D15A1D3B4189"
+const NFC_ID = window.location.pathname.split("/")[1] || "default";
 
 function App() {
-  const [messages, setMessages] = useState<string[]>([])
-  const [input, setInput] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [messages, setMessages] = useState<string[]>([]);
+  const [input, setInput] = useState("");
 
+  // Nachrichten laden
   useEffect(() => {
     const loadMessages = async () => {
       const { data, error } = await supabase
         .from("messages")
-        .select("message")
+        .select("*")
         .eq("nfc_id", NFC_ID)
-        .order("created_at", { ascending: true })
+        .order("created_at", { ascending: true });
 
       if (error) {
-        console.error("Fehler beim Laden:", error.message)
-        return
+        console.error("Fehler beim Laden:", error.message);
+        return;
       }
 
-      setMessages(data?.map((m) => m.message) || [])
-    }
+      if (data) {
+        setMessages(data.map((m) => m.message));
+      }
+    };
 
-    loadMessages()
-  }, [])
+    loadMessages();
+  }, []);
 
+  // Nachricht senden
   const sendMessage = async () => {
-    if (input.trim() === "") return
-
-    setLoading(true)
+    if (input.trim() === "") return;
 
     const { error } = await supabase.from("messages").insert({
-      thread_id: NFC_ID,    
       nfc_id: NFC_ID,
       message: input,
       created_at: new Date().toISOString(),
-    })
-
-    setLoading(false)
-    setInput("")
+    });
 
     if (error) {
-      console.error("Fehler beim Speichern:", error.message)
-      return
+      console.error("Fehler beim Speichern:", error.message);
+      return;
     }
 
-    setMessages([...messages, input])
-  }
+    setMessages([...messages, input]);
+    setInput("");
+  };
 
   return (
     <div className="min-h-screen bg-pink-50 flex items-center justify-center p-4">
       <div className="bg-white shadow-xl rounded-2xl w-full max-w-md p-6 space-y-4">
         <h1 className="text-2xl font-bold text-center text-pink-600">
-          💌 Nachricht für <span className="text-pink-400">{NFC_ID}</span>
+          💌 Dein LoveLetter
         </h1>
+        <p className="text-center text-xs text-gray-400 mb-2">
+          ID: <code>{NFC_ID}</code>
+        </p>
 
         <div className="space-y-2 max-h-64 overflow-y-auto border p-3 rounded-md bg-gray-50">
           {messages.length === 0 && (
@@ -87,15 +86,14 @@ function App() {
           />
           <button
             onClick={sendMessage}
-            disabled={loading}
             className="bg-pink-500 hover:bg-pink-600 text-white rounded-md px-4 py-2 text-sm"
           >
-            {loading ? "..." : "Senden"}
+            Senden
           </button>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
