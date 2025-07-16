@@ -36,6 +36,7 @@ function App() {
     setLoading(true)
 
     const { error } = await supabase.from("messages").insert({
+      thread_id: NFC_ID,    
       nfc_id: NFC_ID,
       message: input,
       created_at: new Date().toISOString(),
