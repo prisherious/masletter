@@ -1,12 +1,13 @@
 import { useParams, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "./supabaseClient";
 
 type Recipe = {
   id: number;
   tag_id: string;
   name: string;
-  ingredients: string;
+  ingredients_json: string[] | null;
+  ingredients?: string | null; // Fallback (Altbestand)
   preparation: string;
   created_at: string;
 };
@@ -15,6 +16,32 @@ export default function RecipeDetail() {
   const { tagId, id } = useParams();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const ingredientsList = useMemo(() => {
+    if (!recipe) return [];
+    if (recipe.ingredients_json && recipe.ingredients_json.length > 0) {
+      return recipe.ingredients_json;
+    }
+    return (recipe.ingredients || "")
+      .split("\n")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }, [recipe]);
+
+  const shoppingListText = useMemo(
+    () => ingredientsList.join("\n"),
+    [ingredientsList]
+  );
+
+  const copyShoppingList = async () => {
+    if (!shoppingListText) return;
+    try {
+      await navigator.clipboard.writeText(shoppingListText);
+      alert("Einkaufsliste kopiert – jetzt in Notizen einfügen.");
+    } catch {
+      prompt("Kopiere die Einkaufsliste:", shoppingListText);
+    }
+  };
 
   useEffect(() => {
     const load = async () => {
@@ -59,9 +86,18 @@ export default function RecipeDetail() {
             </div>
 
             <section>
-              <h2 className="text-sm font-semibold text-gray-700 mb-2">Zutaten</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-gray-700 mb-2">Zutaten</h2>
+                <button
+                  type="button"
+                  onClick={copyShoppingList}
+                  className="bg-green-500 hover:bg-green-600 text-white rounded-md px-3 py-1 text-xs"
+                >
+                  Einkaufsliste kopieren
+                </button>
+              </div>
               <ul className="list-disc pl-5 text-sm text-gray-800">
-                {recipe.ingredients.split("\n").map((line, i) => (
+                {ingredientsList.map((line, i) => (
                   <li key={i}>{line}</li>
                 ))}
               </ul>

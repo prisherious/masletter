@@ -9,8 +9,7 @@ export default function App() {
           Scanne deinen <strong>NFC‑Tag</strong>, um zu deiner persönlichen Rezepte‑Homepage zu gelangen.
         </p>
         <div className="text-xs text-gray-400 text-center">
-          Dev‑Tipp: Du kannst auch manuell eine Tag‑URL öffnen, z.&nbsp;B.&nbsp;{" "}
-          <code>/mein-tag-123</code>.
+          Dev‑Tipp: Du kannst auch manuell eine Tag‑URL öffnen, z.&nbsp;B.&nbsp;<code>/demo-tag</code>.
         </div>
         <div className="flex justify-center">
           <Link
