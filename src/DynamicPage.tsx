@@ -6,9 +6,9 @@ type RecipeRow = {
   id: number;
   tag_id: string;
   name: string;
-  ingredients_json: string[] | null;
-  ingredients?: string | null; // Fallback für Altbestand
   preparation: string;
+  ingredients_json?: string[] | null;
+  ingredients?: string | null; // Fallback (Altbestand TEXT)
   created_at: string;
 };
 
@@ -21,7 +21,7 @@ export default function DynamicPage() {
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Formular-State
+  // Formular
   const [name, setName] = useState("");
   const [ingredients, setIngredients] = useState<string[]>([""]);
   const [preparation, setPreparation] = useState("");
@@ -40,9 +40,9 @@ export default function DynamicPage() {
     setIngredients(filtered.length ? filtered : [""]);
   };
 
-  // Einkaufsliste (aus dem Formular)
+  // Einkaufsliste
   const shoppingListText = useMemo(
-    () => ingredients.filter((x) => x.trim() !== "").join("\n"),
+    () => ingredients.map((s) => s.trim()).filter(Boolean).join("\n"),
     [ingredients]
   );
   const copyShoppingList = async () => {
@@ -55,7 +55,7 @@ export default function DynamicPage() {
     }
   };
 
-  // Rezepte laden
+  // Laden
   const refetch = useCallback(async () => {
     if (!tagId) return;
     setLoading(true);
@@ -67,8 +67,7 @@ export default function DynamicPage() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Fehler beim Laden:", error.message);
-      setErrorMsg("Konnte Rezepte nicht laden.");
+      setErrorMsg(error.message);
     } else {
       setRecipes((data as RecipeRow[]) || []);
     }
@@ -79,38 +78,63 @@ export default function DynamicPage() {
     refetch();
   }, [refetch]);
 
-  // Speichern
+  // Speichern mit JSONB -> Fallback TEXT
   const saveRecipe = async () => {
     if (!tagId) return;
-    const ing = ingredients.map((s) => s.trim()).filter(Boolean);
-    if (!name.trim() || ing.length === 0 || !preparation.trim()) return;
+    const ingArray = ingredients.map((s) => s.trim()).filter(Boolean);
+    if (!name.trim() || ingArray.length === 0 || !preparation.trim()) return;
 
     setSaving(true);
     setErrorMsg(null);
 
-    const { data, error } = await supabase
+    // 1) Versuch: JSONB
+    const tryJson = await supabase
       .from("recipes")
       .insert({
         tag_id: tagId,
         name: name.trim(),
-        ingredients_json: ing, // JSON-Array
+        ingredients_json: ingArray,    // JSON-Array
         preparation: preparation.trim(),
       })
       .select("*")
       .single();
 
-    if (error) {
-      console.error("Fehler beim Speichern:", error.message);
-      setErrorMsg("Speichern fehlgeschlagen. Prüfe RLS/Policies und Spalten.");
-      setSaving(false);
-      return;
-    }
-
-    // Falls Supabase kein Row-Result zurückgibt, Liste neu laden.
-    if (!data) {
-      await refetch();
+    if (!tryJson.error) {
+      // Erfolg
+      setRecipes((prev) => [tryJson.data as RecipeRow, ...prev]);
     } else {
-      setRecipes((prev) => [data as RecipeRow, ...prev]);
+      const msg = tryJson.error.message?.toLowerCase() || "";
+      const looksLikeSchemaIssue =
+        msg.includes("column") && msg.includes("does not exist");
+      const looksLikeJsonIssue =
+        msg.includes("invalid input syntax for type json") ||
+        msg.includes("jsonb");
+
+      if (looksLikeSchemaIssue || looksLikeJsonIssue) {
+        // 2) Fallback: TEXT-Spalte 'ingredients'
+        const tryText = await supabase
+          .from("recipes")
+          .insert({
+            tag_id: tagId,
+            name: name.trim(),
+            ingredients: ingArray.join("\n"), // TEXT fallback
+            preparation: preparation.trim(),
+          })
+          .select("*")
+          .single();
+
+        if (!tryText.error) {
+          setRecipes((prev) => [tryText.data as RecipeRow, ...prev]);
+        } else {
+          setErrorMsg(`Speichern (TEXT) fehlgeschlagen: ${tryText.error.message}`);
+          setSaving(false);
+          return;
+        }
+      } else {
+        setErrorMsg(`Speichern fehlgeschlagen: ${tryJson.error.message}`);
+        setSaving(false);
+        return;
+      }
     }
 
     // Formular leeren
@@ -122,7 +146,7 @@ export default function DynamicPage() {
 
   const previewIngredients = (r: RecipeRow) => {
     const list =
-      (r.ingredients_json && r.ingredients_json.length > 0
+      (r.ingredients_json && r.ingredients_json.length
         ? r.ingredients_json
         : (r.ingredients || "")
             .split("\n")
@@ -137,9 +161,7 @@ export default function DynamicPage() {
       <div className="container-box w-full max-w-2xl space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Kochbuch</h1>
-          <span className="text-xs text-gray-400">
-            Tag: <code>{tagId}</code>
-          </span>
+          <span className="text-xs text-gray-400">Tag: <code>{tagId}</code></span>
         </div>
 
         {errorMsg && (
@@ -183,12 +205,11 @@ export default function DynamicPage() {
             <input
               type="text"
               className="border rounded-md p-2 text-sm"
-              placeholder="Rezeptname (z. B. Spaghetti Carbonara)"
+              placeholder="Rezeptname"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
 
-            {/* Zutaten dynamisch */}
             <div className="space-y-2">
               <label className="text-xs font-medium text-gray-600">Zutaten</label>
               {ingredients.map((ing, i) => (
@@ -225,7 +246,7 @@ export default function DynamicPage() {
 
             <textarea
               className="border rounded-md p-2 text-sm min-h-[140px]"
-              placeholder={"Zubereitung (Freitext)\n1) …"}
+              placeholder="Zubereitung"
               value={preparation}
               onChange={(e) => setPreparation(e.target.value)}
             />
