@@ -1,153 +1,44 @@
-/* Import romantische Schriftarten */
+/* Minimaler, neutraler Look für das Kochbuch */
+
+/* Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap');
 
-/* Grundlayout */
 body {
   margin: 0;
   padding: 0;
   font-family: 'Inter', sans-serif;
-  background: linear-gradient(135deg, #ffeef8 0%, #f0e6ff 50%, #e8f4fd 100%);
+  background: #ffffff; /* Weißer Hintergrund */
   min-height: 100vh;
+  color: #333;
 }
 
-/* Root-Container */
 #root {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 1rem;
   min-height: 100vh;
-  position: relative;
 }
 
-/* Titel mit Taube */
+/* Allgemeine Boxen */
+.container-box {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+/* Header */
 h1 {
   font-family: 'Playfair Display', serif;
   font-size: 2.5rem;
   text-align: center;
-  color: #8b4b8c;
+  color: #222;
   margin-bottom: 1rem;
-  position: relative;
 }
 
-h1::before {
-  content: '🕊️💌';
-  display: block;
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
+/* Buttons */
+button {
+  transition: background-color 0.2s ease;
 }
 
-/* Nachrichten-Container */
-.chat-container {
-  background: #fff;
-  padding: 2rem;
-  border-radius: 20px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-  width: 100%;
-  max-width: 480px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-/* Einzelne Nachricht als Brief */
-.message {
-  background: #fff8f0;
-  border: 1px solid #ffe4e1;
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 4px 8px rgba(255, 182, 193, 0.2);
-  font-family: 'Inter', sans-serif;
-  position: relative;
-  word-break: break-word;
-}
-
-.message::before {
-  content: '📩';
-  position: absolute;
-  top: -10px;
-  left: -10px;
-  font-size: 1.2rem;
-  background: white;
-  border-radius: 50%;
-  padding: 0.2rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-/* Datum unter Nachricht */
-.message-time {
-  font-size: 0.6rem;
-  color: #999;
-  margin-top: 0.5rem;
-  text-align: center;
-  display: block;
-}
-
-/* Eingabebereich */
-.chat-input-container {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin-top: 1rem;
-}
-
-/* Eingabe selbst */
-.chat-input {
-  flex: 1;
-  border: none;
-  background: #fff;
-  padding: 0.8rem 1rem;
-  border-radius: 12px;
-  font-size: 1rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-/* Fokus Effekt */
-.chat-input:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 105, 180, 0.2);
-}
-
-/* Senden-Button */
-.chat-send-button {
-  background: #ff69b4;
-  width: 36px;
-  height: 36px;
-  font-size: 1rem;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  box-shadow: 0 2px 8px rgba(255, 105, 180, 0.2);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease;
-}
-
-.chat-send-button:hover {
-  transform: scale(1.05);
-}
-
-/* Mobil optimiert */
-@media (max-width: 480px) {
-  .chat-container {
-    padding: 1rem;
-    border-radius: 16px;
-  }
-
-  .chat-input {
-    padding: 0.6rem 0.8rem;
-    font-size: 0.9rem;
-  }
-
-  .chat-send-button {
-    width: 32px;
-    height: 32px;
-    font-size: 0.9rem;
-  }
-
-  h1 {
-    font-size: 2rem;
-  }
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

@@ -2,14 +2,14 @@ import { Link } from "react-router-dom";
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-pink-50 flex items-center justify-center p-4">
-      <div className="bg-white shadow-xl rounded-2xl w-full max-w-md p-6 space-y-4">
-        <h1 className="text-2xl font-bold text-center text-pink-600">📖 Rezeptebuch</h1>
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="container-box w-full max-w-md space-y-4">
+        <h1>Kochbuch</h1>
         <p className="text-center text-sm text-gray-600">
-          Scanne deinen <strong>NFC‑Tag</strong>, um zu deiner persönlichen Rezepte‑Homepage zu gelangen.
+          Scanne deinen <strong>NFC-Tag</strong>, um zu deiner persönlichen Rezepte-Homepage zu gelangen.
         </p>
         <div className="text-xs text-gray-400 text-center">
-          Dev‑Tipp: Du kannst auch manuell eine Tag‑URL öffnen, z.&nbsp;B.&nbsp;<code>/demo-tag</code>.
+          Dev-Tipp: Du kannst auch manuell eine Tag-URL öffnen, z.&nbsp;B.&nbsp;<code>/demo-tag</code>.
         </div>
         <div className="flex justify-center">
           <Link
