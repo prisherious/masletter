@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import App from './App.tsx'
 import DynamicPage from './DynamicPage.tsx'
-import RecipeDetail from './RecipeDetail.tsx'
+import RecipeDetail from './RecipeDetails.tsx'
 import './App.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
