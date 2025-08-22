@@ -1,44 +1,149 @@
-/* Minimaler, neutraler Look für das Kochbuch */
+/* Minimaler, neutraler Dark‑Look für das Kochbuch */
 
 /* Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap');
+
+/* Global */
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
 
 body {
   margin: 0;
   padding: 0;
   font-family: 'Inter', sans-serif;
-  background: #ffffff; /* Weißer Hintergrund */
-  min-height: 100vh;
-  color: #333;
+  background: #000;            /* Schwarzer Hintergrund */
+  color: #eaeaea;              /* Helle Schrift */
+  line-height: 1.5;
 }
 
-#root {
-  min-height: 100vh;
+/* Links */
+a {
+  color: #7ab7ff;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
 }
 
-/* Allgemeine Boxen */
+/* Container / Karten */
 .container-box {
-  background: #fff;
+  background: #111;            /* Dunkle Karte */
+  color: inherit;
   padding: 2rem;
   border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  border: 1px solid #222;
 }
 
 /* Header */
-h1 {
+h1, h2, h3 {
   font-family: 'Playfair Display', serif;
+  color: #fff;
+  margin-top: 0;
+}
+h1 {
   font-size: 2.5rem;
   text-align: center;
-  color: #222;
   margin-bottom: 1rem;
+}
+
+/* Formulare */
+input, textarea, select {
+  background: #0b0b0b;
+  color: #eaeaea;
+  border: 1px solid #252525;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  outline: none;
+}
+input::placeholder,
+textarea::placeholder {
+  color: #8a8a8a;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: #3a86ff;
+  box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.25);
+}
+
+/* Tabellen (falls du welche nutzt) */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #0d0d0d;
+  border: 1px solid #222;
+  border-radius: 12px;
+  overflow: hidden;
+}
+th, td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #1b1b1b;
+}
+th {
+  text-align: left;
+  color: #ffffff;
+  background: #111;
+}
+tr:nth-child(even) td {
+  background: #0f0f0f;
 }
 
 /* Buttons */
 button {
-  transition: background-color 0.2s ease;
+  appearance: none;
+  border: 1px solid #2b2b2b;
+  background: #1a1a1a;
+  color: #f2f2f2;
+  padding: 0.7rem 1.1rem;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 0.04s ease, background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
 }
-
+button:hover {
+  background: #222;
+  border-color: #3a3a3a;
+}
+button:active {
+  transform: translateY(1px);
+}
 button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Hilfsklassen */
+.muted {
+  color: #a9a9a9;
+}
+.hr {
+  height: 1px;
+  background: #1d1d1d;
+  border: 0;
+  margin: 1.25rem 0;
+}
+
+/* Utilities für Abstände (optional) */
+.mt-1 { margin-top: .25rem; }
+.mt-2 { margin-top: .5rem; }
+.mt-3 { margin-top: 1rem; }
+.mt-4 { margin-top: 1.5rem; }
+.mb-1 { margin-bottom: .25rem; }
+.mb-2 { margin-bottom: .5rem; }
+.mb-3 { margin-bottom: 1rem; }
+.mb-4 { margin-bottom: 1.5rem; }
+
+/* Responsives Feintuning */
+@media (max-width: 640px) {
+  .container-box {
+    padding: 1.25rem;
+  }
+  h1 {
+    font-size: 2rem;
+  }
 }
