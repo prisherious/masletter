@@ -2,11 +2,15 @@ export type ProcessedImage = {
   blob: Blob;
   width: number;
   height: number;
-  placeholderDataUrl: string; // sehr kleines Base64-LQIP
+  placeholderDataUrl: string; // sehr kleines Base64 (LQIP)
   ext: "webp" | "jpg";
 };
 
-export async function readFileAsImage(file: File): Promise<HTMLImageElement> {
+/**
+ * Bild auf maximal 1600px Kantenlänge skalieren,
+ * als WebP (Fallback JPEG) exportieren und ein kleines LQIP erzeugen.
+ */
+export async function processImage(file: File, maxEdge = 1600): Promise<ProcessedImage> {
   const url = URL.createObjectURL(file);
   try {
     const img = await new Promise<HTMLImageElement>((resolve, reject) => {
@@ -15,57 +19,39 @@ export async function readFileAsImage(file: File): Promise<HTMLImageElement> {
       i.onerror = reject;
       i.src = url;
     });
-    return img;
+
+    const scale = Math.min(maxEdge / img.width, maxEdge / img.height, 1);
+    const w = Math.round(img.width * scale);
+    const h = Math.round(img.height * scale);
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext("2d")!;
+    ctx.drawImage(img, 0, 0, w, h);
+
+    // großes Bild -> bevorzugt WebP
+    let blob: Blob | null = await new Promise((ok) => canvas.toBlob((b) => ok(b), "image/webp", 0.86));
+    if (!blob) {
+      blob = await new Promise((ok) => canvas.toBlob((b) => ok(b), "image/jpeg", 0.9));
+    }
+
+    // kleines Placeholder (LQIP) – ~24px Breite
+    const phW = 24;
+    const phH = Math.max(1, Math.round((h / w) * phW));
+    const ph = document.createElement("canvas");
+    ph.width = phW; ph.height = phH;
+    ph.getContext("2d")!.drawImage(canvas, 0, 0, phW, phH);
+    const placeholderDataUrl = ph.toDataURL("image/jpeg", 0.6);
+
+    return {
+      blob: blob!,
+      width: w,
+      height: h,
+      placeholderDataUrl,
+      ext: blob!.type.includes("webp") ? "webp" : "jpg",
+    };
   } finally {
-    // URL nicht sofort revoken, wir brauchen sie evtl. noch für Preview
+    // URL bewusst nicht sofort revoke'n, damit Preview weiter funktioniert
   }
-}
-
-export async function processImage(
-  file: File,
-  opts: { maxW?: number; maxH?: number; quality?: number } = {}
-): Promise<ProcessedImage> {
-  const { maxW = 1600, maxH = 1600, quality = 0.86 } = opts;
-  const img = await readFileAsImage(file);
-
-  const ratio = Math.min(maxW / img.width, maxH / img.height, 1);
-  const targetW = Math.round(img.width * ratio);
-  const targetH = Math.round(img.height * ratio);
-
-  const canvas = document.createElement("canvas");
-  canvas.width = targetW;
-  canvas.height = targetH;
-  const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(img, 0, 0, targetW, targetH);
-
-  // großes Bild als WebP (Fallback: JPEG)
-  let blob: Blob;
-  try {
-    blob = await new Promise<Blob>((resolve) =>
-      canvas.toBlob((b) => resolve(b!), "image/webp", quality)
-    );
-    if (!blob) throw new Error("webp failed");
-  } catch {
-    blob = await new Promise<Blob>((resolve) =>
-      canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.9)
-    );
-  }
-
-  // sehr kleines Placeholder (LQIP), z.B. 24px Breite
-  const phW = 24;
-  const phH = Math.max(1, Math.round((targetH / targetW) * phW));
-  const phCanvas = document.createElement("canvas");
-  phCanvas.width = phW;
-  phCanvas.height = phH;
-  const phCtx = phCanvas.getContext("2d")!;
-  phCtx.drawImage(canvas, 0, 0, phW, phH);
-  const placeholderDataUrl = phCanvas.toDataURL("image/jpeg", 0.6);
-
-  return {
-    blob,
-    width: targetW,
-    height: targetH,
-    placeholderDataUrl,
-    ext: blob.type.includes("webp") ? "webp" : "jpg",
-  };
 }

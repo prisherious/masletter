@@ -1,8 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL!;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY!;
+const url = import.meta.env.VITE_SUPABASE_URL as string;
+const anon = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: { persistSession: false }, // wir nutzen eure gerätegebundene Session, kein Supabase-Login
+if (!url || !anon) {
+  // Hilft beim lokalen Debugging, wenn ENV vergessen wurde
+  // (nicht "throw", damit die App-UI sauber eine Fehlermeldung zeigen kann)
+  console.warn("[supabase] Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY");
+}
+
+export const supabase = createClient(url, anon, {
+  auth: { persistSession: false }, // wir nutzen keine Supabase-User-Session hier
 });

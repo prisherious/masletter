@@ -1,17 +1,16 @@
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 type Props = {
   label?: string;
-  value?: File | null;
+  initialPreviewUrl?: string;
   onChange: (file: File | null) => void;
-  initialPreviewUrl?: string; // bereits gespeichertes Bild
 };
 
-export function ImagePicker({ label = "Gerichtsfoto", value, onChange, initialPreviewUrl }: Props) {
-  const [preview, setPreview] = useState<string | null>(initialPreviewUrl ?? null);
+export function ImagePicker({ label = "Gerichtsfoto", initialPreviewUrl, onChange }: Props) {
+  const [preview, setPreview] = useState<string | undefined>(initialPreviewUrl);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleFiles = useCallback((files: FileList | null) => {
+  const handleFiles = (files: FileList | null) => {
     const f = files?.[0];
     if (!f) return;
     if (!f.type.startsWith("image/")) {
@@ -22,24 +21,21 @@ export function ImagePicker({ label = "Gerichtsfoto", value, onChange, initialPr
       alert("Bitte ein Bild unter 12 MB.");
       return;
     }
+    setPreview(URL.createObjectURL(f));
     onChange(f);
-    const url = URL.createObjectURL(f);
-    setPreview(url);
-  }, [onChange]);
-
-  const onDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    handleFiles(e.dataTransfer.files);
   };
 
   return (
     <div>
       <label className="block text-sm font-medium mb-2">{label}</label>
       <div
-        className="relative rounded-2xl border border-border bg-muted/40 p-4 text-center cursor-pointer"
+        className="rounded-2xl border border-gray-200 bg-neutral-50 p-4 text-center cursor-pointer"
         onClick={() => inputRef.current?.click()}
-        onDragOver={(e)=>{ e.preventDefault(); }}
-        onDrop={onDrop}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          handleFiles(e.dataTransfer.files);
+        }}
       >
         {preview ? (
           <img
@@ -50,9 +46,9 @@ export function ImagePicker({ label = "Gerichtsfoto", value, onChange, initialPr
             decoding="async"
           />
         ) : (
-          <div className="py-10 text-sm text-muted-foreground">
-            <div className="mb-2 font-medium">Bild hierher ziehen</div>
-            <div>oder klicken, um ein Bild auszuwählen (JPG/PNG/HEIC/WebP)</div>
+          <div className="py-10 text-sm text-gray-500">
+            <div className="mb-1 font-medium text-gray-700">Bild hierher ziehen</div>
+            <div>oder klicken, um auszuwählen (JPG/PNG/HEIC/WebP)</div>
           </div>
         )}
         <input
@@ -64,8 +60,8 @@ export function ImagePicker({ label = "Gerichtsfoto", value, onChange, initialPr
         />
       </div>
       {preview && (
-        <div className="mt-2 text-xs text-muted-foreground">
-          Tipp: Du kannst ein neues Bild ziehen/auswählen, um es zu ersetzen.
+        <div className="mt-2 text-xs text-gray-500">
+          Tipp: Ziehe ein neues Bild hinein oder wähle erneut, um zu ersetzen.
         </div>
       )}
     </div>
