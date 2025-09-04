@@ -1,5 +1,3 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = "https://voxwqfuixoewcwmlnbby.supabase.co";      // DEINE URL
