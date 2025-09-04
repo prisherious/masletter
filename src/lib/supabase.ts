@@ -12,3 +12,4 @@ if (!url || !anon) {
 export const supabase = createClient(url, anon, {
   auth: { persistSession: false }, // wir nutzen keine Supabase-User-Session hier
 });
+
