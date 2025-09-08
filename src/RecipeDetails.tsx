@@ -37,7 +37,7 @@ export default function RecipeDetail() {
     if (!shoppingListText) return;
     try {
       await navigator.clipboard.writeText(shoppingListText);
-      alert("Einkaufsliste kopiert – jetzt in Notizen einfügen.");
+      alert("Einkaufsliste kopiert – kann jetzt in Notizen einfügen.");
     } catch {
       prompt("Kopiere die Einkaufsliste:", shoppingListText);
     }
