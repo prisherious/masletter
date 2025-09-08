@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Typo-Tuning */
+:root { --radius: 12px; }
+h1,h2,h3 { letter-spacing:-0.01em; }
